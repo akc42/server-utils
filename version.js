@@ -24,6 +24,7 @@
   const child = require('child_process');
   const root = require('app-root-path').toString();
 
+
   function shCmd(cmd) {
     debug('About to execute Command ', cmd);
     return new Promise((resolve, reject) => {
@@ -48,21 +49,16 @@
       debug('Look for git')
       await fs.access(path.resolve(root, '.git'));
       debug('Git found, so use it to get data')
+      //we get here if there is a git directory, so we can look up version and latest commit from them
+      version = await shCmd('git describe --abbrev=0 --tags');
+      //git is installed and we found a tag
       try {
-        //we get here if there is a git directory, so we can look up version and latest commit from them
-        version = await shCmd('git describe --abbrev=0 --tags');
-        try {
-          vtime = await shCmd('git log -1 --format=%cd');
-        } catch (e) {
-          vtime = new Date(); //fake it;
-        }
+        vtime = await shCmd('git log -1 --format=%cd');
       } catch (e) {
-        //no commits yet so just make make it up
-        version = 'v0.0.1';
-        vtime = new Date();
+        vtime = new Date(); //fake it;
       }
     } catch (e) {
-      //no git, so we must look for a version file
+      //no git, or no tag, so we must look for a version file
       try {
         debug('Git approach failed, so look for release info');
         version = await fs.readFile(path.resolve(root, 'release.info'), 'utf8');
@@ -73,10 +69,22 @@
           vtime = new Date();
         }
       } catch(e) {
-        version = 'v1.0.0';
-        vtime = new Date();
+        //no release info file, so use package.json
+        try {
+          const pjsonfile = path.resolve(root, 'package.json');
+          const pjson = require(pjsonfile);
+          version = 'v'+ pjson.version;
+          try {
+            const { mtime } = await fs.stat(pjsonfile);
+            vtime = mtime;
+          } catch (e) {
+            vtime = new Date();
+          }
+        } catch(e) {
+          version = 'v1.0.0';
+          vtime = new Date();
+        }
       }
-
     } finally {
       const copyrightTime = new Date(vtime);
       debug('Resolving with Git copyright Year is ', copyrightTime.getUTCFullYear());
