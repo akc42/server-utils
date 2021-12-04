@@ -24,7 +24,7 @@
 (function() {
   'use strict';
 
-  const chalk = require('chalk');
+  const chalkPromise = import('chalk');
   const { isIP } = require('net');
   let cyrb53;
 
@@ -43,37 +43,43 @@
       return 4294967296 * (2097151 & h2) + (h1 >>> 0);
     };
   }
-  const COLOURS = {
-    app: chalk.rgb(255, 136, 0).bold, //orange,
-    db: chalk.greenBright,
-    api: chalk.magentaBright,
-    client: chalk.redBright,
-    log: chalk.yellowBright,
-    mail:chalk.cyanBright,
-    //error like have backGround colouring
-    auth: chalk.black.bgCyan,
-    err: chalk.white.bgBlue,
-    error: chalk.white.bgRed
-  };
+  const COLOURPromise = new Promise(async accept => {
+    const {default: chalk} = await import('chalk');
+    accept({
+      app: chalk.rgb(255, 136, 0).bold, //orange,
+      db: chalk.greenBright,
+      api: chalk.magentaBright,
+      client: chalk.redBright,
+      log: chalk.yellowBright,
+      mail: chalk.cyanBright,
+      //error like have backGround colouring
+      auth: chalk.black.bgCyan,
+      err: chalk.white.bgBlue,
+      error: chalk.white.bgRed
+    });
+  });
+
 
   function logger(ip,level, ...messages) {
     if (process.env.LOG_NONE === undefined) {
-      let logLine = '';
-      if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
-      let message;
-      let logcolor
-      if (isIP(ip) === 0 ) {
-        logcolor = ip;
-        message = level + messages.join(' ');
-      } else {
-        const client = process.env.LOG_IP_HIDDEN !== undefined ? cyrb53(ip): ip;
-        logLine += COLOURS.client(client + ': ');
-        logcolor = level
-        message = messages.join(' ');
-      }
-      logLine += COLOURS[logcolor](message);
-      //eslint-disable-next-line no-console
-      console.log(logLine.trim());
+      COLOURPromise.then(COLOURS => {
+        let logLine = '';
+        if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
+        let message;
+        let logcolor;
+        if (isIP(ip) === 0 ) {
+          logcolor = ip;
+          message = level + messages.join(' ');
+        } else {
+          const client = process.env.LOG_IP_HIDDEN !== undefined ? cyrb53(ip): ip;
+          logLine += COLOURS.client(client + ': ');
+          logcolor = level
+          message = messages.join(' ');
+        }
+        logLine += COLOURS[logcolor](message);
+        //eslint-disable-next-line no-console
+        console.log(logLine.trim());
+      });
     }
   }
 
