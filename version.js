@@ -86,9 +86,10 @@
         }
       }
     } finally {
+      const finalversion = version.replace(/\s+/g, ' ').trim(); //trim out new lines and multiple spaces just one.
       const copyrightTime = new Date(vtime);
       debug('Resolving with Git copyright Year is ', copyrightTime.getUTCFullYear());
-      resolve({ version: version, year: copyrightTime.getUTCFullYear() });
+      resolve({ version: finalversion, year: copyrightTime.getUTCFullYear() });
     }
   });
   module.exports = releaseVersion;
