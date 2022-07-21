@@ -60,26 +60,25 @@
   });
 
 
-  function logger(ip,level, ...messages) {
+  async function logger(ip,level, ...messages) {
     if (process.env.LOG_NONE === undefined) {
-      COLOURPromise.then(COLOURS => {
-        let logLine = '';
-        if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
-        let message;
-        let logcolor;
-        if (isIP(ip) === 0 ) {
-          logcolor = ip;
-          message = level + messages.join(' ');
-        } else {
-          const client = process.env.LOG_IP_HIDDEN !== undefined ? cyrb53(ip): ip;
-          logLine += COLOURS.client(client + ': ');
-          logcolor = level
-          message = messages.join(' ');
-        }
-        logLine += COLOURS[logcolor](message);
-        //eslint-disable-next-line no-console
-        console.log(logLine.trim());
-      });
+      const COLOURS = await COLOURPromise;
+      let logLine = '';
+      if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
+      let message;
+      let logcolor;
+      if (isIP(ip) === 0 ) {
+        logcolor = ip;
+        message = level + messages.join(' ');
+      } else {
+        const client = process.env.LOG_IP_HIDDEN !== undefined ? cyrb53(ip): ip;
+        logLine += COLOURS.client(client + ': ');
+        logcolor = level
+        message = messages.join(' ');
+      }
+      logLine += COLOURS[logcolor](message);
+      //eslint-disable-next-line no-console
+      console.log(logLine.trim());     
     }
   }
 
