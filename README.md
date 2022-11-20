@@ -1,13 +1,9 @@
 # server-utils
 A Set of Utilities that I generally use on SPA projects for the server side of the project
 
-It consists of 4 separate packages.  
+It consists of 4 separate packages 6 entry points.
 
-`database` is a module to open (creating it if it doesn't yet exist from a `database.sql` file).  It uses two environment 
-variables to locate the database DATABASE_DB_DIR and DATABASE_DB are the directory and filename respectively of the sqlite3 
-database. It also used DATABASE_DB_BUSY for the busy timeout.  DATABASE_DB_DIR can either be an absolute value, or relative 
-from the project root (see npm module `app-root-path`). If the database file does not exist, it attempt to create it from the script
-read from file named by DATABASE_INIT_FILE.  The path can be relative to project root or an absolute value.
+The packages are:-
 
 `logger` provides a logging service for the app.  It is controlled by three environment variables LOG_NONE prevents it from logging anything.
 This is designed to be used during testing of the server side of the app so that nothing is logged.  LOG_NO_DATE omits the date and time from
@@ -23,22 +19,28 @@ with `new Responder(response);` and the resultant object has three methods;
   promise which resolves when any blockage is cleared.
 - `end` signifies the end of stream.  Any attempt to call the other two methods after this has been called will throw an error.
 
-`version` provides a promise that ultimately resolves to an object which has two
+`Version` provides an async function with a single parameter, the path to you
+project root) that ultimately resolves to an object which has two
 fields.  `version` which is the version string and `year` which is the copyright
-year.  It does this with the help of the npm module `app-root-path` read the
-instructions for that module if it doesn't give the right result for you. The
-project root is where either the `.git` directory exists (in which case
+year.  The project root is where either the `.git` directory exists (in which case
 `version` will ask git for the version and calculate the copyright year from the
 last git log entry) or where a `release.info` file is sitting (in which case
 `version` will expect that to contain a version string and have a modification
 time from which the copyright year can be derived).  If neither of those
 possibilities exist it will try to get the version info from the `package.json` file.
 
-These can either be installed all together
+`Debug` module provides three entry points, `Debug`, `dumpDebugCache` and
+`setDebugConfig`. The `Debug` entry point is the main one, the user calls this a
+string representing the topic for the debug stream and we return a function that
+will allow him to call with string arguments which will be concatenated (with a
+space separator) to form a debug string.  If `setDebugConfig` has already been
+called to specify that the topic is to be logged (by providing a colon
+separated list of topics to be logged), then this is output. Regardless, all
+debug calls are stored in a 50 line cache, and will be output (newest first) on a call
+to `dumpDebugCache`
+
+
+Thise are installed with as many of few of the items that you want like so:-
 ```
-const {logger,database,version,Responder} = require('@akc42/server-utils');
-```
-or individually
-```
-const logger = require('@akc42/server-utils/logger');
+import {logger,Responder,Debug} from '@akc42/server-utils';
 ```
