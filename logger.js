@@ -51,7 +51,7 @@ if (process.env.LOG_NO_ENCODE) {
   };
 }
 
-export default async function logger(ip,level, ...messages) {
+export default function logger(ip,level, ...messages) {
   if (process.env.LOG_NONE === undefined) {
     let logLine = '';
     if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
