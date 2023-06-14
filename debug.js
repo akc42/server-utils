@@ -21,6 +21,7 @@
 import chalk from 'chalk';
 let config = '';
 let cache = [];
+let cachelimit = 50;
   
 export function Debug (topic) {
     const t = topic;
@@ -42,7 +43,7 @@ export function Debug (topic) {
         console.log(output);
       } 
       cache.push(output);
-      cache.splice(0,cache.length - 50); //prevent it getting too big  
+      if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
   }
 };
 export function dumpDebugCache() {
@@ -54,7 +55,8 @@ export function dumpDebugCache() {
   cache.reverse();
   console.log(output);
 };
-export function setDebugConfig(con) {
+export function setDebugConfig(con, limit = 50) {
+  cachelimit = limit;
   if (con !== config) {
     config = con;
     const output = `${chalk.greenBright('debug server config')} ${chalk.redBright(`new server config "${config}"`)}`

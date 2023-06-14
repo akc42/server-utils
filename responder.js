@@ -20,9 +20,7 @@
 
  import Debug from 'debug';
 
-
-
-  const debug = Debug('responder');
+const debug = Debug('responder');
   
 export default  class Responder {
   constructor(response) {
@@ -49,14 +47,14 @@ export default  class Responder {
         this.response.write('{"' + name + '": ');
       }
 
-      if (value !== undefined) {
+      if (typeof value !== 'undefined') {
         this.response.write(JSON.stringify(value));
         this.inSection = false;
-        debug('Value section %s',name);
+        debug('Write conplete section',name, 'with' , JSON.stringify(value));
       } else {
         this.response.write('[');
         this.inSection = true;
-        debug('In section %s',name);
+        debug('Started Section',name);
       }
       this.doneFirstSection = true;
       this.doneFirstRow = false;
