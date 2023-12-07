@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with Server Utils.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+import fs from 'node:fs/promises';
 import chalk from 'chalk';
 let config = '';
 let cache = [];
@@ -40,7 +40,14 @@ export function Debug (topic) {
       }, '');      
       const output = `${chalk.greenBright(topic)} ${chalk.cyan(message)} ${chalk.whiteBright(`(${gap}ms)`)}`
       if (enabled) {
-        console.log(output);
+        if (typeof process.env.LOG_FILE === 'undefined') {
+          //eslint-disable-next-line no-console
+          console.log(output);
+        } else {
+          fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
+            if (err) console.warn('Failed to write following message to log file', output);
+          });
+        }    
       } 
       cache.push(output);
       if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
@@ -50,17 +57,38 @@ export function dumpDebugCache() {
   const output = chalk.white.bgBlue('Above are all the debug calls (most recent first) which lead up to, and then followed on from, the error above');
   cache.reverse();
   for(const line of cache) {
-    console.log(line);
+    if (typeof process.env.LOG_FILE === 'undefined') {
+      //eslint-disable-next-line no-console
+      console.log(line);
+    } else {
+      fs.appendFile(process.env.LOG_FILE, line + '\n',{flush: true}, err => {
+        if (err) console.warn('Failed to write following message to log file', line);
+      })
+    }    
   }
   cache.reverse();
-  console.log(output);
+  if (typeof process.env.LOG_FILE === 'undefined') {
+    //eslint-disable-next-line no-console
+    console.log(output);
+  } else {
+    fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
+      if (err) console.warn('Failed to write following message to log file', output);
+    })
+  }    
 };
 export function setDebugConfig(con, limit = 50) {
   cachelimit = limit;
   if (con !== config) {
     config = con;
     const output = `${chalk.greenBright('debug server config')} ${chalk.redBright(`new server config "${config}"`)}`
-    console.log(output);
+    if (typeof process.env.LOG_FILE === 'undefined') {
+      //eslint-disable-next-line no-console
+      console.log(output);
+    } else {
+      fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
+        if (err) console.warn('Failed to write following message to log file', output);
+      })
+    }    
   }
 };
 

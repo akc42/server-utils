@@ -7,8 +7,8 @@ The packages are:-
 
 `logger` provides a logging service for the app.  It is controlled by three environment variables LOG_NONE prevents it from logging anything.
 This is designed to be used during testing of the server side of the app so that nothing is logged.  LOG_NO_DATE omits the date and time from
-the logged output.  This is generally used when another logger (e.g PM2 log output) is also adding date/time.  Finally LOG_NO_ENCODE is used
-to say don't try and anonomise client ip addresses (see below).  `logger` is called so `logger([clientip,] level, ...messages);`.  
+the logged output.  This is generally used when another logger (e.g PM2 log output) is also adding date/time.  Finally LOG_HIDDEN_IP is used
+to say  to try and anonomise client ip addresses (see below).  `logger` is called so `logger([clientip,] level, ...messages);`.  
 
 `Responder` is a class to provide the ability to stream JSON responses to a node js http request. It is instanciated
 with `new Responder(response);` and the resultant object has three methods;
@@ -39,8 +39,13 @@ separated list of topics to be logged), then this is output. Regardless, all
 debug calls are stored in a 50 line cache, and will be output (newest first) on a call
 to `dumpDebugCache`
 
+Breaking change as of 3.0.0  logger is now an async function returning a promise fulfilled when (if set) a log file entry is made
 
-Thise are installed with as many of few of the items that you want like so:-
+both `Debug` and `logger` bit now support LOG_FILE environment variable. When set points to a log file rather than the
+console. If it is not undefined these two modules will write to the log file rather than the console.
+
+
+These are installed with as many of few of the items that you want like so:-
 ```
 import {logger,Responder,Debug} from '@akc42/server-utils';
 ```

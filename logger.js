@@ -19,7 +19,8 @@
 */
 
 import chalk from 'chalk';
-import { isIP } from 'net';
+import { isIP } from 'node:net';
+import fs from 'node:fs/promises'
 
 const COLOURS = {
   app: chalk.rgb(255, 136, 0).bold, //orange,
@@ -34,11 +35,7 @@ const COLOURS = {
   error: chalk.white.bgRed
 
 };
-let cyrb53;
-if (process.env.LOG_NO_ENCODE) {
-  cyrb53 = (str, seed = 0) => {return str;};
-} else {
-  cyrb53 = (str, seed = 0) => {
+function cyrb53 (str, seed = 0) {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
     for (let i = 0, ch; i < str.length; i++) {
       ch = str.charCodeAt(i);
@@ -48,27 +45,34 @@ if (process.env.LOG_NO_ENCODE) {
     h1 = Math.imul(h1 ^ h1 >>> 16, 2246822507) ^ Math.imul(h2 ^ h2 >>> 13, 3266489909);
     h2 = Math.imul(h2 ^ h2 >>> 16, 2246822507) ^ Math.imul(h1 ^ h1 >>> 13, 3266489909);
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-  };
 }
 
-export default function logger(ip,level, ...messages) {
+export default async function logger(ip,level, ...messages) {
   if (process.env.LOG_NONE === undefined) {
     let logLine = '';
-    if (process.env.LOG_NO_DATE === undefined) logLine += new Date().toISOString() + ': ';
+    if (typeof process.env.LOG_NO_DATE === 'undefined') logLine += new Date().toISOString() + ': ';
     let message;
     let logcolor;
     if (isIP(ip) === 0 ) {
       logcolor = ip;
       message = level + messages.join(' ');
     } else {
-      const client = process.env.LOG_IP_HIDDEN !== undefined ? cyrb53(ip): ip;
+      const client = typeof process.env.LOG_IP_HIDDEN !== 'undefined' ? cyrb53(ip): ip;
       logLine += COLOURS.client(client + ': ');
       logcolor = level
       message = messages.join(' ');
     }
     logLine += COLOURS[logcolor](message);
-    //eslint-disable-next-line no-console
-    console.log(logLine.trim());     
+    if (typeof process.env.LOG_FILE === 'undefined') {
+      //eslint-disable-next-line no-console
+      console.log(logLine.trim());
+    } else {
+      try {
+        await fs.appendFile(process.env.LOG_FILE, logLine.trim() + '\n',{flush: true})
+      } catch(err) {
+        console.warn('Error writing log file:',err,'message being logged', logLine.trim());
+      }
+    }     
   }
 }
 
