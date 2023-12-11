@@ -26,7 +26,7 @@ let cachelimit = 50;
 export function Debug (topic) {
     const t = topic;
     let timestamp = new Date().getTime();
-    return function (...args) {
+    return async function (...args) {
       let enabled = false;
       if (config) {
         const topics = config.split(':');
@@ -44,16 +44,18 @@ export function Debug (topic) {
           //eslint-disable-next-line no-console
           console.log(output);
         } else {
-          fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
-            if (err) console.warn('Failed to write following message to log file', output);
-          });
+          try {
+            await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true})
+          } catch(err) {
+            console.warn('Failed to write following message to log file', output);
+          }
         }    
       } 
       cache.push(output);
       if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
   }
 };
-export function dumpDebugCache() {
+export async function dumpDebugCache() {
   const output = chalk.white.bgBlue('Above are all the debug calls (most recent first) which lead up to, and then followed on from, the error above');
   cache.reverse();
   for(const line of cache) {
@@ -61,9 +63,11 @@ export function dumpDebugCache() {
       //eslint-disable-next-line no-console
       console.log(line);
     } else {
-      fs.appendFile(process.env.LOG_FILE, line + '\n',{flush: true}, err => {
-        if (err) console.warn('Failed to write following message to log file', line);
-      })
+      try {
+        await fs.appendFile(process.env.LOG_FILE, line + '\n',{flush: true});
+      } catch (err) {
+        console.warn('Failed to write following message to log file', line);
+      }
     }    
   }
   cache.reverse();
@@ -71,12 +75,14 @@ export function dumpDebugCache() {
     //eslint-disable-next-line no-console
     console.log(output);
   } else {
-    fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
-      if (err) console.warn('Failed to write following message to log file', output);
-    })
+    try {
+      await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true});
+    } catch(err) {
+      console.warn('Failed to write following message to log file', output);
+    }
   }    
 };
-export function setDebugConfig(con, limit = 50) {
+export async function setDebugConfig(con, limit = 50) {
   cachelimit = limit;
   if (con !== config) {
     config = con;
@@ -85,9 +91,11 @@ export function setDebugConfig(con, limit = 50) {
       //eslint-disable-next-line no-console
       console.log(output);
     } else {
-      fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true}, err => {
-        if (err) console.warn('Failed to write following message to log file', output);
-      })
+      try {
+        await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true})
+      } catch (err) {
+        console.warn('Failed to write following message to log file', output);
+      }
     }    
   }
 };

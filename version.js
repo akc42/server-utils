@@ -25,16 +25,16 @@ import { exec } from 'node:child_process';
 
 const debug = Debug('version');
 
-function shCmd(cmd, root) {
-  debug('About to execute Command ', cmd);
-  return new Promise((accept, reject) => {
-    exec(cmd, { cwd: root }, (err, stdout, stderr) => {
+async function shCmd(cmd, root) {
+  await debug('About to execute Command ', cmd);
+  return new Promise(async (accept, reject) => {
+    exec(cmd, { cwd: root }, async (err, stdout, stderr) => {
       if (stderr) {
-        debug('Command ', cmd, 'about to fail with ', err);
+        await debug('Command ', cmd, 'about to fail with ', err);
         reject(err);
       } else {
         const out = stdout.trim();
-        debug('Command ', cmd, 'Success with ', out);
+        await debug('Command ', cmd, 'Success with ', out);
         accept(out);
       }
     });
@@ -46,9 +46,9 @@ export default async function(root) {
   let vtime;
 
   try {
-    debug('Look for git')
+    await debug('Look for git')
     await access(resolve(root, '.git'));
-    debug('Git found, so use it to get data')
+    await debug('Git found, so use it to get data')
     //we get here if there is a git directory, so we can look up version and latest commit from them
     version = await shCmd('git describe --abbrev=0 --tags');
     //git is installed and we found a tag
@@ -60,7 +60,7 @@ export default async function(root) {
   } catch (e) {
     //no git, or no tag, so we must look for a version file
     try {
-      debug('Git approach failed, so look for release info');
+      await debug('Git approach failed, so look for release info');
       version = await readFile(resolve(root, 'release.info'), 'utf8');
       try {
         const { mtime } = await stat(resolve(root, 'release.info'));
@@ -88,7 +88,7 @@ export default async function(root) {
   } finally {
     const finalversion = version.replace(/\s+/g, ' ').trim(); //trim out new lines and multiple spaces just one.
     const copyrightTime = new Date(vtime);
-    debug('Resolving with Git copyright Year is ', copyrightTime.getUTCFullYear());
+    await debug('Resolving with Git copyright Year is ', copyrightTime.getUTCFullYear());
     return({ version: finalversion, year: copyrightTime.getUTCFullYear() });
   }
 };
