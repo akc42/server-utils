@@ -20,7 +20,6 @@
 
 import chalk from 'chalk';
 import { isIP } from 'node:net';
-import fs from 'node:fs/promises'
 
 const COLOURS = {
   app: chalk.rgb(255, 136, 0).bold, //orange,
@@ -47,7 +46,7 @@ function cyrb53 (str, seed = 0) {
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 }
 
-export default async function logger(ip,level, ...messages) {
+export default function logger(ip,level, ...messages) {
   if (process.env.LOG_NONE === undefined) {
     let logLine = '';
     if (typeof process.env.LOG_NO_DATE === 'undefined') logLine += new Date().toISOString() + ': ';
@@ -63,16 +62,8 @@ export default async function logger(ip,level, ...messages) {
       message = messages.join(' ');
     }
     logLine += COLOURS[logcolor](message);
-    if (typeof process.env.LOG_FILE === 'undefined') {
-      //eslint-disable-next-line no-console
+    //eslint-disable-next-line no-console
       console.log(logLine.trim());
-    } else {
-      try {
-        await fs.appendFile(process.env.LOG_FILE, logLine.trim() + '\n',{flush: true})
-      } catch(err) {
-        console.warn('Error writing log file:',err,'message being logged', logLine.trim());
-      }
-    }     
   }
 }
 

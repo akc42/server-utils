@@ -26,7 +26,7 @@ let cachelimit = 50;
 export function Debug (topic) {
     const t = topic;
     let timestamp = new Date().getTime();
-    return async function (...args) {
+    return function (...args) {
       let enabled = false;
       if (config) {
         const topics = config.split(':');
@@ -40,63 +40,31 @@ export function Debug (topic) {
       }, '');      
       const output = `${chalk.greenBright(topic)} ${chalk.cyan(message)} ${chalk.whiteBright(`(${gap}ms)`)}`
       if (enabled) {
-        if (typeof process.env.LOG_FILE === 'undefined') {
-          //eslint-disable-next-line no-console
-          console.log(output);
-        } else {
-          try {
-            await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true})
-          } catch(err) {
-            console.warn('Failed to write following message to log file', output);
-          }
-        }    
+         //eslint-disable-next-line no-console
+        console.log(output);
       } 
       cache.push(output);
       if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
   }
 };
-export async function dumpDebugCache() {
+export function dumpDebugCache() {
   const output = chalk.white.bgBlue('Above are all the debug calls (most recent first) which lead up to, and then followed on from, the error above');
   cache.reverse();
   for(const line of cache) {
-    if (typeof process.env.LOG_FILE === 'undefined') {
-      //eslint-disable-next-line no-console
-      console.log(line);
-    } else {
-      try {
-        await fs.appendFile(process.env.LOG_FILE, line + '\n',{flush: true});
-      } catch (err) {
-        console.warn('Failed to write following message to log file', line);
-      }
-    }    
+    //eslint-disable-next-line no-console
+    console.log(line);
   }
   cache.reverse();
-  if (typeof process.env.LOG_FILE === 'undefined') {
     //eslint-disable-next-line no-console
-    console.log(output);
-  } else {
-    try {
-      await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true});
-    } catch(err) {
-      console.warn('Failed to write following message to log file', output);
-    }
-  }    
+  console.log(output);
 };
-export async function setDebugConfig(con, limit = 50) {
+export function setDebugConfig(con, limit = 50) {
   cachelimit = limit;
   if (con !== config) {
     config = con;
     const output = `${chalk.greenBright('debug server config')} ${chalk.redBright(`new server config "${config}"`)}`
-    if (typeof process.env.LOG_FILE === 'undefined') {
-      //eslint-disable-next-line no-console
-      console.log(output);
-    } else {
-      try {
-        await fs.appendFile(process.env.LOG_FILE, output + '\n',{flush: true})
-      } catch (err) {
-        console.warn('Failed to write following message to log file', output);
-      }
-    }    
+    //eslint-disable-next-line no-console
+    console.log(output);
   }
 };
 

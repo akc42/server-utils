@@ -41,8 +41,7 @@ to `dumpDebugCache`
 
 Breaking change as of 3.0.0  logger is now an async function returning a promise fulfilled when (if set) a log file entry is made
 
-both `Debug` and `logger` bit now support LOG_FILE environment variable. When set points to a log file rather than the
-console. If it is not undefined these two modules will write to the log file rather than the console.
+both `Debug` and `logger` have had their file logging removed as its causing more issues that its worth
 
 
 These are installed with as many of few of the items that you want like so:-
