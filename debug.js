@@ -17,9 +17,9 @@
     You should have received a copy of the GNU General Public License
     along with Server Utils.  If not, see <http://www.gnu.org/licenses/>.
 */
-import fs from 'node:fs/promises';
+
 import chalk from 'chalk';
-let config = '';
+let config = process.env.DEBUG || '';
 let cache = [];
 let cachelimit = 50;
   
@@ -40,7 +40,7 @@ export function Debug (topic) {
       }, '');      
       const output = `${chalk.greenBright(topic)} ${chalk.cyan(message)} ${chalk.whiteBright(`(${gap}ms)`)}`
       if (enabled) {
-         //eslint-disable-next-line no-console
+        //eslint-disable-next-line no-console
         console.log(output);
       } 
       cache.push(output);
