@@ -49,7 +49,13 @@ function cyrb53 (str, seed = 0) {
 export default function logger(ip,level, ...messages) {
   if (process.env.LOG_NONE === undefined) {
     let logLine = '';
-    if (typeof process.env.LOG_NO_DATE === 'undefined') logLine += new Date().toISOString() + ': ';
+    if (typeof process.env.LOG_NO_DATE === 'undefined') {
+      if (typeof process.env.LOG_ISO_DATE !== 'undefined') {
+        logLine += new Date().toISOString() + ': ';
+      } else {
+        logLine += new Date().toISOString().substring(0,10) + ' ' + new Date().toLocaleTimeString() + ': ';
+      }
+    }
     let message;
     let logcolor;
     if (isIP(ip) === 0 ) {
