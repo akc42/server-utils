@@ -22,7 +22,7 @@ import chalk from 'chalk';
 let config = process.env.DEBUG || '';
 let cache = [];
 let cachelimit = 50;
-  
+ 
 export function Debug (topic) {
     const t = topic;
     let timestamp = new Date().getTime();
@@ -40,8 +40,17 @@ export function Debug (topic) {
       }, '');      
       const output = `${chalk.greenBright(topic)} ${chalk.cyan(message)} ${chalk.whiteBright(`(${gap}ms)`)}`
       if (enabled) {
+        let logLine = '';
+        if (typeof process.env.LOG_NO_DATE === 'undefined') {
+          if (typeof process.env.LOG_ISO_DATE !== 'undefined') {
+            logLine += new Date().toISOString() + ': ';
+          } else {
+            logLine += new Date().toISOString().substring(0,10) + ' ' + new Date().toLocaleTimeString() + ': ';
+          }
+        }
+        logLine += output;
         //eslint-disable-next-line no-console
-        console.log(output);
+        console.log(logLine);
       } 
       cache.push(output);
       if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
