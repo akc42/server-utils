@@ -51,12 +51,14 @@ export function Debug (topic) {
         logLine += output;
         //eslint-disable-next-line no-console
         console.log(logLine);
-      } 
-      cache.push(output);
+      }
+      const time = chalk.whiteBright(new Date().toISOString().substring(11,23)); //store millisecond timing
+      cache.push(`${time} ${output}`);
       if (cache.length > cachelimit) cache.splice(0,cache.length - cachelimit); //prevent it getting too big  
   }
 };
 export function dumpDebugCache() {
+  const time = chalk.whiteBright(new Date().toISOString());
   const output = chalk.white.bgBlue('Above are all the debug calls (most recent first) which lead up to, and then followed on from, the error above');
   cache.reverse();
   for(const line of cache) {
@@ -65,7 +67,7 @@ export function dumpDebugCache() {
   }
   cache.reverse();
     //eslint-disable-next-line no-console
-  console.log(output);
+  console.log(`${time} - ${output}`);
 };
 export function setDebugConfig(con, limit = 50) {
   cachelimit = limit;
