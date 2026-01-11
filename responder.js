@@ -18,13 +18,8 @@
     along with Server Utils.  If not, see <http://www.gnu.org/licenses/>.
 */
 
- import Debug from 'debug';
-
-const debug = Debug('responder');
-  
-export default  class Responder {
+export class Responder {
   constructor(response) {
-    debug('Starting responder');
     this.response = response;
     this.doneFirstRow = false;
     this.doneFirstSection = false;
@@ -50,11 +45,9 @@ export default  class Responder {
       if (typeof value !== 'undefined') {
         this.response.write(JSON.stringify(value));
         this.inSection = false;
-        debug('Write conplete section',name, 'with' , JSON.stringify(value));
       } else {
         this.response.write('[');
         this.inSection = true;
-        debug('Started Section',name);
       }
       this.doneFirstSection = true;
       this.doneFirstRow = false;
@@ -80,15 +73,12 @@ export default  class Responder {
       if (reply) {
         return Promise.resolve();
       }
-      debug('False reply from write so need return the promise of a drain');
       if (!this.awaitingDrain) {
         this.awaitingDrain = true;
         const self = this;
-        debug('create a drain promise as we do not have one');
         this.drainPromise = new Promise(resolve => {
           self.response.once('drain', () => {
             self.awaitingDrain = false;
-            debug('drained so resolve promise of drain');
             resolve();
           });
         });
@@ -98,7 +88,6 @@ export default  class Responder {
     return Promise.reject(); //mark as blocked
   }
   end() {
-    debug('End Responder');
     if (!this.ended) {
       if (this.inSection) {
         this.response.write(']');

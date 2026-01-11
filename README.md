@@ -1,50 +1,109 @@
 # server-utils
 A Set of Utilities that I generally use on SPA projects for the server side of the project
 
-It consists of 4 separate packages 6 entry points.
+It consists of 4 separate packages 8 entry points.
 
 The packages are:-
 
-`logger` provides a logging service for the app.  It is controlled by three environment variables LOG_NONE prevents it from logging anything.
-This is designed to be used during testing of the server side of the app so that nothing is logged.  LOG_NO_DATE omits the date and time from
-the logged output.  This is generally used when another logger (e.g PM2 log output) is also adding date/time.  Finally LOG_HIDDEN_IP is used
-to say  to try and anonomise client ip addresses (see below).  `logger` is called so `logger([clientip,] level, ...messages);`.  
+## The Debug Suite
 
-`Responder` is a class to provide the ability to stream JSON responses to a node js http request. It is instanciated
+This package is a complete debugging solution.  The basic concept is that messages get written to a database to be
+available for examination in the future. Messages can be immediately written to the console (that is called `logging`),
+Also if the message was a "crash", the previous `<n>` (where `<n>` is determined from the `DEBUG_CACHE_SIZE` environment
+if it exists, else 100) is re-read from the database and also written to the console.
+
+The **COLOURS** constant is an object contains a set of predefined colours (using the `npm chalk` package) for its properties of `app`,`db`,`api`,`client`, `log`, `mail`, `auth` and `error`.  A *colourspec* is defined as one of those predefined colours or a hex string (hex digits preceeded by a `#`) or an rgb value (a string of three comma separated numbers between 0 and 255) and that will be used to colour the message itself when (and if) is is written to the console. 
+
+If the *shortdate* is defined (defaults to false) then the message, when eventually written to the console, is formatted as "YYYY-MM-DD hh:mm" otherwise it is
+formatted as "YYYY-MM-DD hh:mm:ss.sss" (ie to millisecond accuracy).
+
+The *immediate* parameter says to immediately, after logging to the database, to format the message and output it.
+
+When called the **Debug** function returns a function which is the actual *logger*.  This function can then be called with any number of parameters.  The first three, if present, are checked to match the requirement, but if not are assumed not to be present.  These are
+
+- *crash*  the literal string "crash" - see above for its meaning.  In this case the *colourspec* is ignored and the
+  message is printed in white on a red background.
+- *logtime* A unix timestamp with millisecond accuracy (e.g the result from `Date.now()`), Its only considered valid if
+  it is for today, although it can be earlier than the current time.
+- *ipaddress* An ipv4 address as a string.
+- *...messages* Any number of parameters following which are joined together with a space.
+
+Formally **Debug** is called like this:-
+
+```javascript
+  const debug = Debug(topic,colourspec, shortdate, immediate); 
+
+  debug([crash,][,logtime][ipaddress,]...messages);
+```
+
+This `debug` instance also remembers the time between calls and this time is logged (and subsequently printed) as a "gap". This is printed in milliseconds unless it was a "shortdate" in which case it is printed in minutes.
+
+**Logger** is a function that is a wrapper for *Debug* where `shortdate` and `immediate` are both true. 
+
+**messageFormatter** is the routine that formats the raw message that has been written to the database.
+
+It is called with the following parameters in order:-
+
+- *logid* The `logid` (the primary key) of the message in the database (only used in the message output if the item was
+  a crash).
+- *logtime* This is either a unix timestamp *or* a string with the date and/or time in it.  It should be in the same
+  format as being formatted (see above).
+- *crash* a 0 or 1 dependant on if this message was a crash or not.
+- *shortdate* a 0 or 1 dependant on if this message has a short date or not,
+- *ipaddress* should be a valid ip address or `null`.
+- *topic*
+- *message* Just a single string
+- *colourspec*
+- *gap* Gap in milliseconds (this routine does the conversion to minutes if a `shortdate`).
+
+It returns an Object with 4 properties
+
+- *dayoutput* If the first message of the day, text with the date (only) in it, otherwise a zero length string.
+- *message* The complete formatted message
+- *logid* The `logid` the formatter was called with.
+- *ip* The `ipaddress` the formatter was called with.
+
+**DebugHelper** is a helper function for *Debug* and performs most of its work.   It is called with the same parameters as *Debug* plus an additional one; *writer*.  *writer* should be a callback function that can do something with the message and then return the return object that a debug call does.  In the use by *Debug* this function is the one writes the data to the database, but other writers can be provided. For instance the *Debug* function is the `@akc42/app-utils` package uses the writer to send the message from the client to the server.
+
+*writer* is called with the following parameters (all described above for *debug*, although in this case they *must* be supplied)
+
+- *logtime* (unix timestamp)
+- *crash* (0 or 1)
+- *shortdate* (0 or 1)
+- *ipaddress* (or `null`)
+- *topic*
+- *colourspec*
+- *gap*
+- *immediate* (`true` or `false`)
+
+## Responder
+
+**Responder** is a class to provide the ability to stream JSON responses to a node js http request. It is instanciated
 with `new Responder(response);` and the resultant object has three methods;
 
-- `addSection(name [,value])` creates a new section in the response of the given name, with an optional value (which should
-   be the entirety of a section).
-- `write` allows you add an array row to an existing open section (one where `addSection` is called without a value). It will return a 
-  promise which resolves when any blockage is cleared.
-- `end` signifies the end of stream.  Any attempt to call the other two methods after this has been called will throw an error.
+- *addSection* called like
+  
+  ```javascript
+  addSection(name [,value])
+  ```
+  which creates a new *Object property* in the response of the given name, with an optional value (which should be the entirety of a section).
 
-`Version` provides an async function with a single parameter, the path to you
-project root) that ultimately resolves to an object which has two
-fields.  `version` which is the version string and `year` which is the copyright
-year.  The project root is where either the `.git` directory exists (in which case
-`version` will ask git for the version and calculate the copyright year from the
-last git log entry) or where a `release.info` file is sitting (in which case
-`version` will expect that to contain a version string and have a modification
-time from which the copyright year can be derived).  If neither of those
-possibilities exist it will try to get the version info from the `package.json` file.
+- *write* allows you add an array row to an existing open section (one where *addSection* is called without a value). It
+  will return a promise which resolves when any blockage is cleared. It is recommended to use this when an array of
+  database rows will return more than a very limited number.
+- *end* when signifies the end of stream.  Any attempt to call the other two methods after this has been called will throw an error.
+  
+## Version
 
-`Debug` module provides three entry points, `Debug`, `dumpDebugCache` and
-`setDebugConfig`. The `Debug` entry point is the main one, the user calls this a
-string representing the topic for the debug stream and we return a function that
-will allow him to call with string arguments which will be concatenated (with a
-space separator) to form a debug string.  If `setDebugConfig` has already been
-called to specify that the topic is to be logged (by providing a colon
-separated list of topics to be logged), then this is output. Regardless, all
-debug calls are stored in a 50 line cache, and will be output (newest first) on a call
-to `dumpDebugCache`
+**getVersion** is an async function with a single parameter, the path to your project root.
 
-Breaking change as of 3.0.0  logger is now an async function returning a promise fulfilled when (if set) a log file entry is made
+It ultimately resolves to an object which has two fields.  `version` which is the version string and `year` which is the
+copyright year.  The project root is where either the `.git` directory exists (in which case `version` will ask git for
+the version and calculate the copyright year from the last git log entry) or where a `release.info` file is sitting (in
+which case `version` will expect that to contain a version string and have a modification time from which the copyright
+year can be derived).  If neither of those possibilities exist it will try to get the version info from the
+`package.json` file.
 
-both `Debug` and `logger` have had their file logging removed as its causing more issues that its worth
+## Utils
 
-
-These are installed with as many of few of the items that you want like so:-
-```
-import {logger,Responder,Debug} from '@akc42/server-utils';
-```
+**nullif0len** is the only function currently in this package.  It is a function that takes a single parameter.  If that parameters is either undefined or a string that has zero length it returns null. Otherwise it returns what was input.
