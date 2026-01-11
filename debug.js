@@ -153,7 +153,7 @@ function logWrapper(logtime, crash, shortdate,ipaddress, topic, message, colours
     DEBUG_CACHE_SIZE environment variable to specify this.
 */
 
-async function getDebugLog(callback, loid, no, ip) {
+export async function getDebugLog(callback, loid, no, ip) {
   const lid = loid;
   const limit = no
   const ipadd = ip;

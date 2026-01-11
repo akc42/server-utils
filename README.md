@@ -1,7 +1,7 @@
 # server-utils
 A Set of Utilities that I generally use on SPA projects for the server side of the project
 
-It consists of 4 separate packages 5 entry points.
+It consists of 4 separate packages 6 entry points.
 
 The packages are:-
 
@@ -40,6 +40,11 @@ This `debug` instance also remembers the time between calls and this time is log
 
 **Logger** is a function that is a wrapper for *Debug* where `shortdate` and `immediate` are both true. 
 
+**getDebugLog** is an async function that fetches past debug log entries.  It is normally called after a crash with the following parameters
+
+- *logid* of the message we want to fetch before
+- *limit* the maximum number of messages to retrieve
+- *ipaddress* if not null then only fetch those messages with the same ip address
 
 ## Responder
 
