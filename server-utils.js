@@ -22,17 +22,12 @@
 
 import {getVersion}from './version.js';
 import {Responder} from './responder.js';
-import { messageFormatter, COLOURS } from './message-formatter.js';
-import { DebugHelper } from './debug-helper.js';
 import { Debug, Logger} from './debug.js';
 import { nullif0len } from './utils.js';
 export {
-  COLOURS,
   Debug,
-  DebugHelper,
   getVersion,
   Logger,
-  messageFormatter,
   nullif0len,
   Responder
 };

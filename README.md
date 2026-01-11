@@ -1,7 +1,7 @@
 # server-utils
 A Set of Utilities that I generally use on SPA projects for the server side of the project
 
-It consists of 4 separate packages 8 entry points.
+It consists of 4 separate packages 5 entry points.
 
 The packages are:-
 
@@ -40,41 +40,6 @@ This `debug` instance also remembers the time between calls and this time is log
 
 **Logger** is a function that is a wrapper for *Debug* where `shortdate` and `immediate` are both true. 
 
-**messageFormatter** is the routine that formats the raw message that has been written to the database.
-
-It is called with the following parameters in order:-
-
-- *logid* The `logid` (the primary key) of the message in the database (only used in the message output if the item was
-  a crash).
-- *logtime* This is either a unix timestamp *or* a string with the date and/or time in it.  It should be in the same
-  format as being formatted (see above).
-- *crash* a 0 or 1 dependant on if this message was a crash or not.
-- *shortdate* a 0 or 1 dependant on if this message has a short date or not,
-- *ipaddress* should be a valid ip address or `null`.
-- *topic*
-- *message* Just a single string
-- *colourspec*
-- *gap* Gap in milliseconds (this routine does the conversion to minutes if a `shortdate`).
-
-It returns an Object with 4 properties
-
-- *dayoutput* If the first message of the day, text with the date (only) in it, otherwise a zero length string.
-- *message* The complete formatted message
-- *logid* The `logid` the formatter was called with.
-- *ip* The `ipaddress` the formatter was called with.
-
-**DebugHelper** is a helper function for *Debug* and performs most of its work.   It is called with the same parameters as *Debug* plus an additional one; *writer*.  *writer* should be a callback function that can do something with the message and then return the return object that a debug call does.  In the use by *Debug* this function is the one writes the data to the database, but other writers can be provided. For instance the *Debug* function is the `@akc42/app-utils` package uses the writer to send the message from the client to the server.
-
-*writer* is called with the following parameters (all described above for *debug*, although in this case they *must* be supplied)
-
-- *logtime* (unix timestamp)
-- *crash* (0 or 1)
-- *shortdate* (0 or 1)
-- *ipaddress* (or `null`)
-- *topic*
-- *colourspec*
-- *gap*
-- *immediate* (`true` or `false`)
 
 ## Responder
 
