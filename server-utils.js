@@ -22,10 +22,12 @@
 
 import {getVersion}from './version.js';
 import {Responder} from './responder.js';
-import { Debug, Logger} from './debug.js';
+import { Debug, Logger, DebugLog, close} from './debug.js';
 import { nullif0len } from './utils.js';
 export {
+  close,
   Debug,
+  DebugLog,
   getVersion,
   Logger,
   nullif0len,
