@@ -20,7 +20,8 @@ import { EventEmitter } from 'node:events';
 import { setTimeout } from 'node:timers/promises';
 import chalk from "chalk";
 import {openDatabase} from '@akc42/sqlite-db';
-import { DebugHelper, messageFormatter, COLOURS } from './debug-utils.js';
+import { messageFormatter, COLOURS } from './message-formatter.js';
+import { DebugHelper} from './debug-helper.js';
 
 class DebugLogEvents extends EventEmitter {}
 /*
