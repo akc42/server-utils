@@ -22,15 +22,18 @@
 
 import {getVersion}from './version.js';
 import {Responder} from './responder.js';
-import { Debug, Logger, DebugLog, close, getDebugLog} from './debug.js';
+import { Debug, Logger, logWriter, DebugLog, close, getDebugLog} from './debug.js';
+import {COLOURS} from './debug-utils.js';
 import { nullif0len } from './utils.js';
 export {
   close,
+  COLOURS,
   Debug,
   DebugLog,
   getDebugLog,
   getVersion,
   Logger,
+  logWriter,
   nullif0len,
   Responder
 };
