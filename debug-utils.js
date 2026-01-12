@@ -103,7 +103,7 @@ export function DebugHelper(topic, colourspec, shortdate, immediate, writer) {
 
     const fromDate = new Date(); //logtime is only possible if later than midnight last night.
     const from = fromDate.setHours(0,0,0,0)
-    if (!(Number.isInteger(logtime) && logtime > from.getTime())) {
+    if (!(Number.isInteger(logtime) && logtime > from)) {
       if (ip !== undefined) {
         if (Array.isArray(ip)) args = ip.concat(args); else args.unshift(ip);        
       }
