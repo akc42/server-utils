@@ -165,7 +165,7 @@ export async function getDebugLog(callback, loid, no, ip) {
     const {logtime:lt } = getLogtime.get(lid)??{logtime:0}
     if (lt > 0) {
       const fetchRecords = db.prepare(`SELECT logid, logtime,crash,shortdate,ipaddress, topic,message,colourspec,gap FROM Log 
-        WHERE (unixepoch(logtime,'subsec')) * 1000 <= ? AND logid <> ? AND ipaddress = ? ORDER BY unixepoch(logtime,'subsec') DESC LIMIT ?`)
+        WHERE (unixepoch(logtime,'subsec')) <= ? AND logid <> ? AND ipaddress = ? ORDER BY unixepoch(logtime,'subsec') DESC LIMIT ?`)
       if (!db.inTransaction) db.exec('BEGIN TRANSACTION');
       for (const {logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap} of fetchRecords.iterate(lt, lid, ipadd??null, limit)) {
         const output = messageFormatter(logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap)
