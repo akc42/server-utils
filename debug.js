@@ -141,7 +141,7 @@ export function logWriter(logtime, crash, shortdate,ipaddress, topic, message, c
 
 function logWrapper(logtime, crash, shortdate,ipaddress, topic, message, colourspec,gap, i) {
   const output = logWriter(logtime, crash, shortdate, ipaddress, topic, message, colourspec, gap);
-  if (i) console.log(output.message);
+  if (i === 1) console.log(output.message);
   return output;
 }
 
@@ -230,7 +230,6 @@ export function Logger(topic, colourspec) {
   return function(c, ip, ...args) {
     const crash = (c === 'crash');
     const output = debug(c,ip,args);
-    console.log(output.message);
     if (crash) {
       let lt;
       getDebugLog(async(logid,message) => {

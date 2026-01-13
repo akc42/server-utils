@@ -1,6 +1,6 @@
 {
   "name": "@akc42/server-utils",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "type": "module",
   "description": "A Set of Utilities to use on the Server Side of a Project",
   "main": "./server-utils.js",
