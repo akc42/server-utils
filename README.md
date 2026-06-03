@@ -76,4 +76,14 @@ year can be derived).  If neither of those possibilities exist it will try to ge
 
 ## Utils
 
-**nullif0len** is the only function currently in this package.  It is a function that takes a single parameter.  If that parameters is either undefined or a string that has zero length it returns null. Otherwise it returns what was input.
+**dateToSqliteDate** is a function that takes a javascript date and turns it into a date string (format YYYY-MM-DD) for
+feeding into a sqlite query.
+
+**dateToSqliteDatetime** is a finction that takes a javascript date and turns into a date and time string (format
+YYYY-MM-DD hh:mm:ss) for feeding into a sqlite query.
+
+**denull** is a function that take an object (meant to be a row from an sqlite query) and if there are any null or
+undefined properties in that object it replaces them with a zero length string. It then returns an object with the revised properties.
+
+**nullif0len** is a function that takes a single parameter.  If that parameters is either undefined or a string that has
+zero length it returns null. Otherwise it returns what was input.

@@ -18,10 +18,26 @@
     along with Server Utils.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+export function dateToSqliteDate(adate) {
+  return  `${adate.getFullYear()}-${('00' + (adate.getMonth() + 1)).slice(-2)}-${('00' + adate.getDate()).slice(-2)}`;
+}
+
+export function dateToSqliteDatetime(adate) {
+  if (adate === null) return null;
+  const displaydate = `${adate.getFullYear()}-${('00' + (adate.getMonth() + 1)).slice(-2)}-${('00' + adate.getDate()).slice(-2)}`;
+  const displaytime = `${('00' + adate.getHours()).slice(-2)}:${('00' + adate.getMinutes()).slice(-2)}:${('00' + adate.getSeconds()).slice(-2)}`;
+  return `${displaydate} ${displaytime}`;
+}
+export function denull(r) {
+  const row = r;
+  for (const field in row) {
+    if (row[field] === null || row[field] == undefined) row[field] = '';
+  }
+  return row;
+}
 
 export function nullif0len (str) {
   if (typeof str === 'undefined') return null;
   if (typeof str === 'string' && str.length === 0) return null;
   return str;
 };
-

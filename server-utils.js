@@ -24,12 +24,15 @@ import {getVersion}from './version.js';
 import {Responder} from './responder.js';
 import { Debug, Logger, logWriter, DebugLog, close, getDebugLog} from './debug.js';
 import {COLOURS} from './debug-utils.js';
-import { nullif0len } from './utils.js';
+import { dateToSqliteDate, dateToSqliteDatetime, denull,nullif0len } from './utils.js';
 export {
   close,
   COLOURS,
+  dateToSqliteDate,
+  dateToSqliteDatetime,
   Debug,
   DebugLog,
+  denull,
   getDebugLog,
   getVersion,
   Logger,

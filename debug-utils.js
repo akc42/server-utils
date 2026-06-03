@@ -46,7 +46,6 @@ export function messageFormatter(logid,logtime, crash, shortdate, ipaddress, top
     matches = [logtime];
   }
   const logdate = new Date(matches[0]);
-  logdate.setMinutes(logdate.getMinutes() + logdate.getTimezoneOffset());
   const displaydate = `${logdate.getFullYear()}-${(logdate.getMonth() + 1).toString().padStart(2,'0')}-${logdate.getDate().toString().padStart(2,'0')}`;
   const displaytime = `${logdate.getHours().toString().padStart(2,'0')}:${logdate.getMinutes().toString().padStart(2,'0')}:${
     logdate.getSeconds().toString().padStart(2,'0')}.${
