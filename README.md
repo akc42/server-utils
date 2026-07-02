@@ -1,7 +1,7 @@
 # server-utils
 A Set of Utilities that I generally use on SPA projects for the server side of the project
 
-It consists of 4 separate packages 6 entry points.
+It consists of 5 separate packages 7 entry points.
 
 The packages are:-
 
@@ -87,3 +87,20 @@ undefined properties in that object it replaces them with a zero length string. 
 
 **nullif0len** is a function that takes a single parameter.  If that parameters is either undefined or a string that has
 zero length it returns null. Otherwise it returns what was input.
+
+## Mutex
+
+**Mutex** is a class to provide single (asynchronous) path throough a section of code.  It is used like this
+
+```js
+  const mutex = new Mutex();
+
+  async function criticalTask() {
+    const release = await mutex.lock();
+    try {
+      //do stuff that is critical
+    } finally {
+      release();
+    }
+  }
+```

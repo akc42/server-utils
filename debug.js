@@ -21,6 +21,7 @@ import { setTimeout } from 'node:timers/promises';
 import chalk from "chalk";
 import {openDatabase} from '@akc42/sqlite-db';
 import { messageFormatter, COLOURS, DebugHelper } from './debug-utils.js';
+import {Mutex} from './mutex.js';
 
 class DebugLogEvents extends EventEmitter {}
 /*
@@ -152,37 +153,38 @@ function logWrapper(logtime, crash, shortdate,ipaddress, topic, message, colours
     function. The callback function may be asynchronous. the "no" parameter is how many to fetch. The logger uses the
     DEBUG_CACHE_SIZE environment variable to specify this.
 */
+const mutex = new Mutex();
 
 export async function getDebugLog(callback, loid, no, ip) {
   const lid = loid;
   const limit = no
   const ipadd = ip;
-  db.open();
+  const release = await mutex.lock(); //we cam't have multiple request for this happening at the same time.
   try {
-    await awaitTransaction(); //make sure we have all the info committed before looking for it.
-    //we are looking from log entries from the crash backwards in time
-    const getLogtime = db.prepare(`SELECT unixepoch(logtime,'subsec') AS logtime FROM Log WHERE logid = ?`)
-    const {logtime:lt } = getLogtime.get(lid)??{logtime:0}
-    if (lt > 0) {
-      const fetchRecords = db.prepare(`SELECT logid, logtime,crash,shortdate,ipaddress, topic,message,colourspec,gap FROM Log 
-        WHERE (unixepoch(logtime,'subsec')) <= ? AND logid <> ? AND ipaddress = ? ORDER BY unixepoch(logtime,'subsec') DESC LIMIT ?`)
-      if (!db.inTransaction) db.exec('BEGIN TRANSACTION');
-      for (const {logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap} of fetchRecords.iterate(lt, lid, ipadd??null, limit)) {
-        const output = messageFormatter(logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap)
-        await callback(output.logid, output.message);
+      await awaitTransaction(); //make sure we have all the info committed before looking for it.
+      //we are looking from log entries from the crash backwards in time
+      const getLogtime = db.prepare(`SELECT unixepoch(logtime,'subsec') AS logtime FROM Log WHERE logid = ?`)
+      const {logtime:lt } = getLogtime.get(lid)??{logtime:0}
+      if (lt > 0) {
+        const fetchRecords = db.prepare(`SELECT logid, logtime,crash,shortdate,ipaddress, topic,message,colourspec,gap FROM Log 
+          WHERE (unixepoch(logtime,'subsec')) <= ? AND logid <> ? AND ipaddress = ? ORDER BY unixepoch(logtime,'subsec') DESC LIMIT ?`)
+        if (!db.inTransaction) db.exec('BEGIN TRANSACTION');
+        for (const {logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap} of fetchRecords.iterate(lt, lid, ipadd??null, limit)) {
+          const output = messageFormatter(logid,logtime,crash,shortdate,ipaddress,topic,message,colourspec,gap)
+          await callback(output.logid, output.message);
+        }
+        
+      } else {
+        console.log(chalk.white.bgBlue('The transaction provided has not yet cleared its transaction, so no records to list.'));
       }
-      
-    } else {
-      console.log(chalk.white.bgBlue('The transaction provided has not yet cleared its transaction, so no records to list.'));
-    }
-  } catch(e) {
-    console.log(chalk.white.bgRed('failed with error'), e.stack);
-    throw e;
+    } catch(e) {
+      console.log(chalk.white.bgRed('getDebugLog failed with error'), e.stack);
   } finally {
     if (db.inTransaction) db.exec('ROLLBACK'); //make sure callback hasn't changed anything
-    db.close();
+    release();
   }
-}
+}  
+
 
 
 
