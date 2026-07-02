@@ -41,7 +41,7 @@ export class Mutex {
       acceptor = accept;
     });
 
-    const currentLock = this.muxtex.then(() => acceptor)
+    const currentLock = this.mutex.then(() => acceptor)
     this.mutex = nextLock;
     return currentLock;
   }
