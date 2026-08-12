@@ -18,11 +18,11 @@
     along with Server Utils.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export function dateToSqliteDate(adate) {
+export function dateToUrlDate(adate) {
   return  `${adate.getFullYear()}-${('00' + (adate.getMonth() + 1)).slice(-2)}-${('00' + adate.getDate()).slice(-2)}`;
 }
 
-export function dateToSqliteDatetime(adate) {
+export function dateToUrlDatetime(adate) {
   if (adate === null) return null;
   const displaydate = `${adate.getFullYear()}-${('00' + (adate.getMonth() + 1)).slice(-2)}-${('00' + adate.getDate()).slice(-2)}`;
   const displaytime = `${('00' + adate.getHours()).slice(-2)}:${('00' + adate.getMinutes()).slice(-2)}:${('00' + adate.getSeconds()).slice(-2)}`;

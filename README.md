@@ -76,11 +76,11 @@ year can be derived).  If neither of those possibilities exist it will try to ge
 
 ## Utils
 
-**dateToSqliteDate** is a function that takes a javascript date and turns it into a date string (format YYYY-MM-DD) for
-feeding into a sqlite query.
+**dateToUrlDate** is a function that takes a javascript date and turns it into a date string (format YYYY-MM-DD) for
+transmitting to client.  This also happens to be the form used by sqlite.
 
-**dateToSqliteDatetime** is a finction that takes a javascript date and turns into a date and time string (format
-YYYY-MM-DD hh:mm:ss) for feeding into a sqlite query.
+**dateToUrlDatetime** is a function that takes a javascript date and turns into a date and time string (format
+YYYY-MM-DD hh:mm:ss).  This can be used to transfer to and from client, or for feeding into a sqlite query.
 
 **denull** is a function that take an object (meant to be a row from an sqlite query) and if there are any null or
 undefined properties in that object it replaces them with a zero length string. It then returns an object with the revised properties.

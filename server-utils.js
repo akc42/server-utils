@@ -24,13 +24,13 @@ import {getVersion}from './version.js';
 import {Responder} from './responder.js';
 import { Debug, Logger, logWriter, DebugLog, close, getDebugLog} from './debug.js';
 import {COLOURS} from './debug-utils.js';
-import { dateToSqliteDate, dateToSqliteDatetime, denull,nullif0len } from './utils.js';
+import { dateToUrlDate, dateToUrlDatetime, denull,nullif0len } from './utils.js';
 import {Mutex} from './mutex.js';
 export {
   close,
   COLOURS,
-  dateToSqliteDate,
-  dateToSqliteDatetime,
+  dateToUrlDate,
+  dateToUrlDatetime,
   Debug,
   DebugLog,
   denull,
